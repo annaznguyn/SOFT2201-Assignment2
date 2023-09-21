@@ -38,6 +38,7 @@ class KeyboardInputHandler {
         pressedKeys.add(keyEvent.getCode());
 
         if (keyEvent.getCode().equals(KeyCode.SPACE)) {
+            System.out.println("HERE");
             if (model.shootPressed()) {
                 MediaPlayer shoot = sounds.get("shoot");
                 shoot.stop();

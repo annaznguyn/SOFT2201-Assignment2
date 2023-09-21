@@ -6,7 +6,7 @@ import javafx.scene.image.Image;
 
 import java.io.File;
 
-public class AlienProjectile implements Renderable {
+public class AlienProjectile implements Projectile, Renderable {
 
     private final Image image;
 
@@ -15,8 +15,7 @@ public class AlienProjectile implements Renderable {
     private double width;
     private double height;
 
-    public AlienProjectile(ProjectileStrategy projectileStrategy, Vector2D position, double width, double height) {
-        this.projectileStrategy = projectileStrategy;
+    public AlienProjectile(Vector2D position, double width, double height) {
         this.position = position;
         this.width = width;
         this.height = height;
@@ -46,6 +45,11 @@ public class AlienProjectile implements Renderable {
     @Override
     public Layer getLayer() {
         return Layer.FOREGROUND;
+    }
+
+    @Override
+    public void setProjectileStrategy(ProjectileStrategy projectileStrategy) {
+        this.projectileStrategy = projectileStrategy;
     }
 
     public void applyStrategy() {

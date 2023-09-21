@@ -63,7 +63,7 @@ public class Alien implements Renderable, GameObject {
         speed++;
     }
 
-    public AlienProjectile fireProjectile(GameEngine gameEngine) {
+    public Projectile fireProjectile(GameEngine gameEngine) {
         ProjectileStrategy projectileStrategy = null;
         if (alienType.equals("slow_straight")) {
             projectileStrategy = new SlowProjectileStrategy();
@@ -71,9 +71,10 @@ public class Alien implements Renderable, GameObject {
         else if (alienType.equals("fast_straight")) {
             projectileStrategy = new FastProjectileStrategy();
         }
-        ProjectileParentCreator creator = new ProjectileChildCreator();
-        AlienProjectile alienProjectile = creator.create(projectileStrategy, new Vector2D(position.getX(), position.getY()), 4, 15);
-        gameEngine.getRenderables().add(alienProjectile);
+        ProjectileCreator creator = new AlienProjectileCreator();
+        Projectile alienProjectile = creator.create(new Vector2D(position.getX(), position.getY()), 2, 15);
+        alienProjectile.setProjectileStrategy(projectileStrategy);
+        gameEngine.getRenderables().add((Renderable) alienProjectile);
         return alienProjectile;
     }
 

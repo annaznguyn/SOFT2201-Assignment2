@@ -40,7 +40,7 @@ public class GameEngine {
 
 	private ArrayList<Alien> aliens;
 	private ArrayList<Bunker> bunkers;
-	private ArrayList<AlienProjectile> alienProjectiles;
+	private ArrayList<Projectile> alienProjectiles;
 
 	private boolean flyLeft;
 	private int interval;
@@ -53,7 +53,7 @@ public class GameEngine {
 		this.renderables = new ArrayList<Renderable>();
 		this.aliens = new ArrayList<Alien>();
 		this.bunkers = new ArrayList<Bunker>();
-		this.alienProjectiles = new ArrayList<AlienProjectile>();
+		this.alienProjectiles = new ArrayList<Projectile>();
 		// read the config here
 		JSONParser parser = new JSONParser();
 		try {
@@ -176,7 +176,7 @@ public class GameEngine {
 	}
 
 	public boolean shootPressed(){
-		player.shoot();
+		player.shoot(this);
 		return true;
 	}
 
@@ -269,18 +269,18 @@ public class GameEngine {
 		if (alienProjectiles.size() > 0) {
 //			System.out.println("Height: " + alienProjectiles.get(0).getHeight() + "\nY: " + alienProjectiles.get(0).getPosition().getY() + "\nGame Y: " + gameY);
 		}
-		ArrayList<AlienProjectile> toBeRemovedProj = new ArrayList<AlienProjectile>();
-		for (AlienProjectile p : alienProjectiles) {
-			if (p.getPosition().getY() + p.getHeight() + 1 >= this.gameY) {
+		ArrayList<Projectile> toBeRemovedProj = new ArrayList<Projectile>();
+		for (Projectile p : alienProjectiles) {
+			if (((Renderable) p).getPosition().getY() + ((Renderable) p).getHeight() + 1 >= this.gameY) {
 				toBeRemovedProj.add(p);
 			}
 			else {
 				p.applyStrategy();
 			}
 		}
-		for (AlienProjectile p : toBeRemovedProj) {
+		for (Projectile p : toBeRemovedProj) {
 			alienProjectiles.remove(p);
-			renderables.remove(p);
+			renderables.remove((Renderable) p);
 		}
 	}
 

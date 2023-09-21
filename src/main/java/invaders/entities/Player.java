@@ -1,5 +1,6 @@
 package invaders.entities;
 
+import invaders.engine.GameEngine;
 import invaders.logic.Damagable;
 import invaders.physics.Moveable;
 import invaders.physics.Vector2D;
@@ -60,8 +61,10 @@ public class Player implements Moveable, Damagable, Renderable {
         this.position.setX(this.position.getX() + 1);
     }
 
-    public void shoot(){
-        // todo
+    public void shoot(GameEngine gameEngine) {
+        ProjectileCreator creator = new PlayerProjectileCreator();
+        Projectile playerProjectile = creator.create(new Vector2D(position.getX(), position.getY()), 2, 15);
+        gameEngine.getRenderables().add((Renderable) playerProjectile);
     }
 
     @Override
