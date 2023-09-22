@@ -2,6 +2,8 @@ package invaders.entities;
 
 import invaders.GameObject;
 import invaders.engine.GameEngine;
+import invaders.physics.BoxCollider;
+import invaders.physics.Collider;
 import invaders.physics.Vector2D;
 import invaders.rendering.Renderable;
 import javafx.scene.image.Image;
@@ -15,6 +17,7 @@ public class Alien implements Renderable, GameObject {
     private boolean isHit;
     private String alienType;
     private final Image image;
+    private Collider boxCollider;
 
     public Alien(AlienBuilder ab) {
         this.position = ab.position;
@@ -24,6 +27,7 @@ public class Alien implements Renderable, GameObject {
         this.image = ab.image;
         this.width = ab.width;
         this.height = ab.height;
+        this.boxCollider = ab.boxCollider;
     }
 
     @Override
@@ -63,6 +67,10 @@ public class Alien implements Renderable, GameObject {
         speed++;
     }
 
+    public Collider getBoxCollider() {
+        return boxCollider;
+    }
+
     public Projectile fireProjectile(GameEngine gameEngine) {
         ProjectileStrategy projectileStrategy = null;
         if (alienType.equals("slow_straight")) {
@@ -72,7 +80,8 @@ public class Alien implements Renderable, GameObject {
             projectileStrategy = new FastProjectileStrategy();
         }
         ProjectileCreator creator = new AlienProjectileCreator();
-        Projectile alienProjectile = creator.create(new Vector2D(position.getX(), position.getY()), 2, 15);
+        Vector2D projectilePosition = new Vector2D(position.getX() + width/2, position.getY());
+        Projectile alienProjectile = creator.create(projectilePosition, new BoxCollider(2, 10, projectilePosition), 2, 10);
         alienProjectile.setProjectileStrategy(projectileStrategy);
         gameEngine.getRenderables().add((Renderable) alienProjectile);
         return alienProjectile;
@@ -82,9 +91,7 @@ public class Alien implements Renderable, GameObject {
     public void start() {}
 
     @Override
-    public void update() {
-
-    }
+    public void update() {}
 
     public void goLeft() {
         position.setX(position.getX() - speed);

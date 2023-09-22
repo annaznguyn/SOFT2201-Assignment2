@@ -1,6 +1,7 @@
 package invaders.entities;
 
 import invaders.physics.Vector2D;
+import invaders.physics.Collider;
 import javafx.scene.image.Image;
 
 import java.io.File;
@@ -15,6 +16,7 @@ public abstract class BunkerBuilder {
     protected int timesHit;
     protected boolean disappear;
     protected BunkerState state;
+    protected Collider boxCollider;
 
     public BunkerBuilder(Vector2D position, double width, double height) {
         this.width = width;
@@ -33,6 +35,10 @@ public abstract class BunkerBuilder {
 
     public void setState(BunkerState state) {
         this.state = state;
+    }
+
+    public void setBoxCollider(Collider boxCollider) {
+        this.boxCollider = boxCollider;
     }
 
     public abstract Bunker getBunker();

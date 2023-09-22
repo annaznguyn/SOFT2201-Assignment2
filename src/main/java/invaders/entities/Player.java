@@ -2,6 +2,8 @@ package invaders.entities;
 
 import invaders.engine.GameEngine;
 import invaders.logic.Damagable;
+import invaders.physics.BoxCollider;
+import invaders.physics.Collider;
 import invaders.physics.Moveable;
 import invaders.physics.Vector2D;
 import invaders.rendering.Animator;
@@ -20,10 +22,12 @@ public class Player implements Moveable, Damagable, Renderable {
     private final double width = 25;
     private final double height = 30;
     private final Image image;
+    private Collider boxCollider;
 
     public Player(Vector2D position){
         this.image = new Image(new File("src/main/resources/player.png").toURI().toString(), width, height, true, true);
         this.position = position;
+        this.boxCollider = new BoxCollider(width, height, position);
     }
 
     @Override
@@ -61,10 +65,12 @@ public class Player implements Moveable, Damagable, Renderable {
         this.position.setX(this.position.getX() + 1);
     }
 
-    public void shoot(GameEngine gameEngine) {
+    public Projectile shoot(GameEngine gameEngine) {
         ProjectileCreator creator = new PlayerProjectileCreator();
-        Projectile playerProjectile = creator.create(new Vector2D(position.getX(), position.getY()), 2, 15);
+        Vector2D projectilePosition = new Vector2D(position.getX() + width/2, position.getY());
+        Projectile playerProjectile = creator.create(projectilePosition, new BoxCollider(2, 10, projectilePosition), 2, 10);
         gameEngine.getRenderables().add((Renderable) playerProjectile);
+        return playerProjectile;
     }
 
     @Override
@@ -90,6 +96,10 @@ public class Player implements Moveable, Damagable, Renderable {
     @Override
     public Layer getLayer() {
         return Layer.FOREGROUND;
+    }
+
+    public Collider getBoxCollider() {
+        return boxCollider;
     }
 
 }

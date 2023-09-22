@@ -1,5 +1,6 @@
 package invaders.entities;
 
+import invaders.physics.Collider;
 import invaders.physics.Vector2D;
 import invaders.rendering.Renderable;
 import javafx.scene.image.Image;
@@ -14,12 +15,14 @@ public class AlienProjectile implements Projectile, Renderable {
     private Vector2D position;
     private double width;
     private double height;
+    private Collider boxCollider;
 
-    public AlienProjectile(Vector2D position, double width, double height) {
+    public AlienProjectile(Vector2D position, Collider boxCollider, double width, double height) {
         this.position = position;
         this.width = width;
         this.height = height;
         this.image = new Image(new File("src/main/resources/projectile.png").toURI().toString(), width, height, false, true);
+        this.boxCollider = boxCollider;
     }
 
     @Override
@@ -52,7 +55,16 @@ public class AlienProjectile implements Projectile, Renderable {
         this.projectileStrategy = projectileStrategy;
     }
 
+    @Override
     public void applyStrategy() {
         projectileStrategy.designBehaviour(position);
+    }
+
+    @Override
+    public void shoot() {}
+
+    @Override
+    public Collider getBoxCollider() {
+        return boxCollider;
     }
 }

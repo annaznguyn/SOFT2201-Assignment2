@@ -1,13 +1,8 @@
 package invaders.entities;
 
 import invaders.physics.Vector2D;
-import javafx.scene.effect.Blend;
-import javafx.scene.effect.BlendMode;
-import javafx.scene.effect.ColorInput;
+import invaders.physics.Collider;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
-import javafx.scene.layout.Pane;
 
 import java.io.File;
 
@@ -21,6 +16,8 @@ public abstract class AlienBuilder {
     protected int speed;
     protected boolean isHit;
     protected String alienType;
+
+    protected Collider boxCollider;
 
     public AlienBuilder(Vector2D position) {
         this.position = position;
@@ -37,6 +34,10 @@ public abstract class AlienBuilder {
 
     public void setAlienType(String alienType) {
         this.alienType = alienType;
+    }
+
+    public void setBoxCollider(Collider boxCollider) {
+        this.boxCollider = boxCollider;
     }
 
     public abstract Alien getAlien();

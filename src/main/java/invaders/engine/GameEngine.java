@@ -6,6 +6,8 @@ import java.util.Random;
 
 import invaders.GameObject;
 import invaders.entities.*;
+import invaders.physics.BoxCollider;
+import invaders.physics.Collider;
 import invaders.physics.Vector2D;
 import invaders.rendering.Renderable;
 
@@ -41,6 +43,7 @@ public class GameEngine {
 	private ArrayList<Alien> aliens;
 	private ArrayList<Bunker> bunkers;
 	private ArrayList<Projectile> alienProjectiles;
+	private ArrayList<Projectile> playerProjectiles;
 
 	private boolean flyLeft;
 	private int interval;
@@ -54,6 +57,7 @@ public class GameEngine {
 		this.aliens = new ArrayList<Alien>();
 		this.bunkers = new ArrayList<Bunker>();
 		this.alienProjectiles = new ArrayList<Projectile>();
+		this.playerProjectiles = new ArrayList<Projectile>();
 		// read the config here
 		JSONParser parser = new JSONParser();
 		try {
@@ -77,6 +81,7 @@ public class GameEngine {
 				alienBuilder.setIsHit(false);
 				alienBuilder.setSpeed(1);
 				alienBuilder.setAlienType(projectileType);
+				alienBuilder.setBoxCollider(new BoxCollider(25, 30, new Vector2D(positionX, positionY)));
 				Alien newAlien = alienBuilder.getAlien();
 				aliens.add(newAlien);
 				renderables.add(newAlien);
@@ -97,6 +102,7 @@ public class GameEngine {
 				bunkerBuilder.setDisappear(false);
 				// initially the state is green
 				bunkerBuilder.setState(new GreenBunker(width, height));
+				bunkerBuilder.setBoxCollider(new BoxCollider(width, height, new Vector2D(positionX, positionY)));
 				Bunker newBunker = bunkerBuilder.getBunker();
 				bunkers.add(newBunker);
 				renderables.add(newBunker);
@@ -127,7 +133,9 @@ public class GameEngine {
 		this.movePlayer();
 		this.moveAlien();
 		this.removeBunker();
-		this.moveProjectile();
+		this.moveAlienProjectile();
+		this.movePlayerProjectile();
+		this.alienGotShot();
 		for (GameObject go: gameobjects){
 			go.update();
 		}
@@ -175,8 +183,8 @@ public class GameEngine {
 		this.right = true;
 	}
 
-	public boolean shootPressed(){
-		player.shoot(this);
+	public boolean shootPressed() {
+		playerProjectiles.add(player.shoot(this));
 		return true;
 	}
 
@@ -184,9 +192,25 @@ public class GameEngine {
 		if(left){
 			player.left();
 		}
-
 		if(right){
 			player.right();
+		}
+	}
+
+	private void movePlayerProjectile() {
+		ArrayList<Projectile> toBeRemovedProj = new ArrayList<Projectile>();
+		for (Projectile p : playerProjectiles) {
+			// remove the projectile if it goes out of the screen
+			if (((Renderable) p).getPosition().getY() - 2 <= 0) {
+				toBeRemovedProj.add(p);
+			}
+			else {
+				p.shoot();
+			}
+		}
+		for (Projectile p : toBeRemovedProj) {
+			playerProjectiles.remove(p);
+			renderables.remove((Renderable) p);
 		}
 	}
 
@@ -238,13 +262,13 @@ public class GameEngine {
 				}
 			}
 			this.alienShoot();
-//			this.moveProjectile();
+//			this.alienGotShot();
 		}
 
 		// increase speed if an alien is hit
 	}
 
-	public void alienShoot() {
+	private void alienShoot() {
 		// after the waiting interval ends
 		if (interval <= 0) {
 			Random r = new Random();
@@ -265,12 +289,10 @@ public class GameEngine {
 		}
 	}
 
-	public void moveProjectile() {
-		if (alienProjectiles.size() > 0) {
-//			System.out.println("Height: " + alienProjectiles.get(0).getHeight() + "\nY: " + alienProjectiles.get(0).getPosition().getY() + "\nGame Y: " + gameY);
-		}
+	private void moveAlienProjectile() {
 		ArrayList<Projectile> toBeRemovedProj = new ArrayList<Projectile>();
 		for (Projectile p : alienProjectiles) {
+			// remove the projectile if it goes out of the screen
 			if (((Renderable) p).getPosition().getY() + ((Renderable) p).getHeight() + 1 >= this.gameY) {
 				toBeRemovedProj.add(p);
 			}
@@ -284,7 +306,7 @@ public class GameEngine {
 		}
 	}
 
-	public void removeBunker() {
+	private void removeBunker() {
 		ArrayList<Bunker> toBeRemovedBunkers = new ArrayList<Bunker>();
 		for (Bunker bunker : bunkers) {
 			if (bunker.hasDisappeared()) {
@@ -293,6 +315,30 @@ public class GameEngine {
 		}
 		for (Bunker bunker : toBeRemovedBunkers) {
 			bunkers.remove(bunker);
+		}
+	}
+
+	private void alienGotShot() {
+		// alien collides with player's projectile
+		ArrayList<Alien> toBeRemovedAlien = new ArrayList<Alien>();
+		ArrayList<Projectile> toBeRemovedProj = new ArrayList<Projectile>();
+		for (Alien alien : aliens) {
+			for (Projectile p : playerProjectiles) {
+				if (alien.getBoxCollider().isColliding(p.getBoxCollider()) && p.getBoxCollider().isColliding(alien.getBoxCollider())) {
+					System.out.println("COLLIDED");
+					toBeRemovedAlien.add(alien);
+					toBeRemovedProj.add(p);
+					break;
+				}
+			}
+		}
+		for (Alien alien : toBeRemovedAlien) {
+			aliens.remove(alien);
+			renderables.remove((Renderable) alien);
+		}
+		for (Projectile p : toBeRemovedProj) {
+			playerProjectiles.remove(p);
+			renderables.remove((Renderable) p);
 		}
 	}
 }
