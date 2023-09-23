@@ -1,5 +1,6 @@
 package invaders.engine;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -7,7 +8,6 @@ import java.util.Random;
 import invaders.GameObject;
 import invaders.entities.*;
 import invaders.physics.BoxCollider;
-import invaders.physics.Collider;
 import invaders.physics.Vector2D;
 import invaders.rendering.Renderable;
 
@@ -30,12 +30,12 @@ public class GameEngine {
 	private final int gameX;
 	private final int gameY;
 
-	private int playerX;
-	private int playerY;
-
 	private List<GameObject> gameobjects;
 	private List<Renderable> renderables;
 	private Player player;
+
+	private int playerX;
+	private int playerY;
 
 	private boolean left;
 	private boolean right;
@@ -65,11 +65,15 @@ public class GameEngine {
 			JSONObject jo = (JSONObject) parser.parse(new FileReader(configPath));
 			// read player
 			JSONObject playerObj = (JSONObject) jo.get("Player");
-			this.playerX = (int) ((long) ((JSONObject) playerObj.get("position")).get("x"));
-			this.playerY = (int) ((long) ((JSONObject) playerObj.get("position")).get("y"));
+			playerX = (int) ((long) ((JSONObject) playerObj.get("position")).get("x"));
+			playerY = (int) ((long) ((JSONObject) playerObj.get("position")).get("y"));
+			String colour = (String) playerObj.get("colour");
+			int lives = (int) ((long) playerObj.get("lives"));
+			player = new Player(new Vector2D(playerX, playerY), lives, colour);
+			renderables.add(player);
+
 			// read enemies
 			JSONArray jsonAliens = (JSONArray) jo.get("Enemies");
-
 			for (Object obj : jsonAliens) {
 				// cast Object type to JSONObject type
 				JSONObject jsonAlien = (JSONObject) obj;
@@ -77,15 +81,14 @@ public class GameEngine {
 				int positionY = (int) ((long) ((JSONObject) jsonAlien.get("position")).get("y"));
 				String projectileType = (String) jsonAlien.get("projectile");
 				// build aliens
-				AlienBuilder alienBuilder = new ConcreteAlienBuilder(new Vector2D(positionX, positionY));
-				alienBuilder.setIsHit(false);
+				Vector2D alienPosition = new Vector2D(positionX, positionY);
+				AlienBuilder alienBuilder = new ConcreteAlienBuilder(alienPosition);
 				alienBuilder.setSpeed(1);
 				alienBuilder.setAlienType(projectileType);
-				alienBuilder.setBoxCollider(new BoxCollider(25, 30, new Vector2D(positionX, positionY)));
+				alienBuilder.setBoxCollider(new BoxCollider(25, 30, alienPosition));
 				Alien newAlien = alienBuilder.getAlien();
 				aliens.add(newAlien);
 				renderables.add(newAlien);
-//				gameobjects.add(newAlien);
 			}
 
 			// read bunkers
@@ -97,16 +100,16 @@ public class GameEngine {
 				int width = (int) ((long) ((JSONObject) jsonBunker.get("size")).get("x"));
 				int height = (int) ((long) ((JSONObject) jsonBunker.get("size")).get("y"));
 				// build bunkers
-				BunkerBuilder bunkerBuilder = new ConcreteBunkerBuilder(new Vector2D(positionX, positionY), width, height);
+				Vector2D bunkerPosition = new Vector2D(positionX, positionY);
+				BunkerBuilder bunkerBuilder = new ConcreteBunkerBuilder(bunkerPosition, width, height);
 				bunkerBuilder.setTimesHit(0);
 				bunkerBuilder.setDisappear(false);
 				// initially the state is green
 				bunkerBuilder.setState(new GreenBunker(width, height));
-				bunkerBuilder.setBoxCollider(new BoxCollider(width, height, new Vector2D(positionX, positionY)));
+				bunkerBuilder.setBoxCollider(new BoxCollider(width, height, bunkerPosition));
 				Bunker newBunker = bunkerBuilder.getBunker();
 				bunkers.add(newBunker);
 				renderables.add(newBunker);
-				gameobjects.add(newBunker);
 			}
 		}
 		catch (FileNotFoundException e) {
@@ -118,8 +121,6 @@ public class GameEngine {
 		catch (ParseException e) {
 			e.printStackTrace();
 		}
-		player = new Player(new Vector2D(this.playerX, this.playerY));
-		renderables.add(player);
 		// initially, the aliens fly to the left side
 		this.flyLeft = true;
 		// random interval length
@@ -129,16 +130,9 @@ public class GameEngine {
 	/**
 	 * Updates the game/simulation
 	 */
-	public void update(){
-		this.movePlayer();
-		this.moveAlien();
-		this.removeBunker();
-		this.moveAlienProjectile();
-		this.movePlayerProjectile();
-		this.alienGotShot();
-		for (GameObject go: gameobjects){
-			go.update();
-		}
+	public void update() {
+		move();
+		collide();
 
 		// ensure that renderable foreground objects don't go off-screen
 		for (Renderable ro: renderables){
@@ -184,7 +178,9 @@ public class GameEngine {
 	}
 
 	public boolean shootPressed() {
-		playerProjectiles.add(player.shoot(this));
+		if (playerProjectiles.size() < 1) {
+			playerProjectiles.add(player.shoot(this));
+		}
 		return true;
 	}
 
@@ -194,6 +190,63 @@ public class GameEngine {
 		}
 		if(right){
 			player.right();
+		}
+	}
+
+	private void move() {
+		movePlayer();
+		moveAlien();
+		moveAlienProjectile();
+		movePlayerProjectile();
+	}
+
+	private void collide() {
+		checkBunkerAlive();
+		bunkerColProj(alienProjectiles);
+		bunkerColProj(playerProjectiles);
+		projCollidesProj();
+		alienCollidesBunker();
+		alienCollidesPlayer();
+		alienGotShot();
+		playerGotShot();
+	}
+
+	private void endGame() {
+		aliens.clear();
+		bunkers.clear();
+		alienProjectiles.clear();
+		playerProjectiles.clear();
+		renderables.clear();
+	}
+
+	private void checkBunkerAlive() {
+		ArrayList<Bunker> toBeRemovedBunker = new ArrayList<Bunker>();
+		for (Bunker b : bunkers) {
+			if (b.hasDisappeared()) {
+				toBeRemovedBunker.add(b);
+			}
+		}
+		removeBunker(toBeRemovedBunker);
+	}
+
+	private void removeBunker(ArrayList<Bunker> toBeRemovedBunker) {
+		for (Bunker b : toBeRemovedBunker) {
+			bunkers.remove(b);
+			renderables.remove(b);
+		}
+	}
+
+	private void removeProjectile(ArrayList<Projectile> toBeRemovedProj, ArrayList<Projectile> projectiles) {
+		for (Projectile p : toBeRemovedProj) {
+			projectiles.remove(p);
+			renderables.remove((Renderable) p);
+		}
+	}
+
+	private void removeAlien(ArrayList<Alien> toBeRemovedAlien) {
+		for (Alien alien : toBeRemovedAlien) {
+			aliens.remove(alien);
+			renderables.remove(alien);
 		}
 	}
 
@@ -208,10 +261,7 @@ public class GameEngine {
 				p.shoot();
 			}
 		}
-		for (Projectile p : toBeRemovedProj) {
-			playerProjectiles.remove(p);
-			renderables.remove((Renderable) p);
-		}
+		removeProjectile(toBeRemovedProj, playerProjectiles);
 	}
 
 	private void moveAlien() {
@@ -261,19 +311,17 @@ public class GameEngine {
 					alien.goRight();
 				}
 			}
-			this.alienShoot();
-//			this.alienGotShot();
 		}
-
-		// increase speed if an alien is hit
+		alienShoot();
+		alienReachesFloor();
 	}
 
 	private void alienShoot() {
 		// after the waiting interval ends
-		if (interval <= 0) {
+		if (interval <= 0 && alienProjectiles.size() == 0) {
 			Random r = new Random();
 			// get a random number from 1-3 inclusive, random number of projectile
-			int randNumOfProj = r.nextInt(3) + 1;
+			int randNumOfProj = r.nextInt(2) + 2;
 			// pick a random number of random aliens
 			for (int i = 0; i < randNumOfProj; i++) {
 				if (aliens.size() >= randNumOfProj) {
@@ -300,45 +348,109 @@ public class GameEngine {
 				p.applyStrategy();
 			}
 		}
-		for (Projectile p : toBeRemovedProj) {
-			alienProjectiles.remove(p);
-			renderables.remove((Renderable) p);
-		}
-	}
-
-	private void removeBunker() {
-		ArrayList<Bunker> toBeRemovedBunkers = new ArrayList<Bunker>();
-		for (Bunker bunker : bunkers) {
-			if (bunker.hasDisappeared()) {
-				toBeRemovedBunkers.add(bunker);
-			}
-		}
-		for (Bunker bunker : toBeRemovedBunkers) {
-			bunkers.remove(bunker);
-		}
+		removeProjectile(toBeRemovedProj, alienProjectiles);
 	}
 
 	private void alienGotShot() {
-		// alien collides with player's projectile
 		ArrayList<Alien> toBeRemovedAlien = new ArrayList<Alien>();
 		ArrayList<Projectile> toBeRemovedProj = new ArrayList<Projectile>();
 		for (Alien alien : aliens) {
 			for (Projectile p : playerProjectiles) {
-				if (alien.getBoxCollider().isColliding(p.getBoxCollider()) && p.getBoxCollider().isColliding(alien.getBoxCollider())) {
-					System.out.println("COLLIDED");
+				if (alien.getBoxCollider().isColliding(p.getBoxCollider())) {
 					toBeRemovedAlien.add(alien);
 					toBeRemovedProj.add(p);
 					break;
 				}
 			}
 		}
-		for (Alien alien : toBeRemovedAlien) {
-			aliens.remove(alien);
-			renderables.remove((Renderable) alien);
+		removeAlien(toBeRemovedAlien);
+		removeProjectile(toBeRemovedProj, playerProjectiles);
+		// increase speed when aliens are shot
+		if (toBeRemovedAlien.size() > 0) {
+			for (Alien alien : aliens) {
+				alien.increaseSpeed();
+			}
 		}
-		for (Projectile p : toBeRemovedProj) {
-			playerProjectiles.remove(p);
-			renderables.remove((Renderable) p);
+	}
+
+	private void alienCollidesBunker() {
+		ArrayList<Bunker> toBeRemovedBunker = new ArrayList<Bunker>();
+		for (Bunker b : bunkers) {
+			for (Alien alien : aliens) {
+				if (b.getBoxCollider().isColliding(alien.getBoxCollider())) {
+					toBeRemovedBunker.add(b);
+					break;
+				}
+			}
+		}
+		removeBunker(toBeRemovedBunker);
+	}
+
+	private void alienCollidesPlayer() {
+		for (Alien a : aliens) {
+			if (a.getBoxCollider().isColliding(player.getBoxCollider())) {
+				endGame();
+				break;
+			}
+		}
+	}
+
+	private void playerGotShot() {
+		ArrayList<Projectile> toBeRemovedProj = new ArrayList<Projectile>();
+		for (Projectile p : alienProjectiles) {
+			if (p.getBoxCollider().isColliding(player.getBoxCollider())) {
+				player.takeDamage(1);
+				toBeRemovedProj.add(p);
+				System.out.println("HERE");
+				// reset player's position
+				break;
+			}
+		}
+//		if (toBeRemovedProj.size() > 0) {
+//			player.setPosition(new Vector2D(playerX, playerY));
+//		}
+		removeProjectile(toBeRemovedProj, alienProjectiles);
+		if (!player.isAlive()) {
+			endGame();
+		}
+	}
+
+	private void bunkerColProj(ArrayList<Projectile> projectiles) {
+		ArrayList<Projectile> toBeRemovedProj = new ArrayList<Projectile>();
+		for (Bunker b : bunkers) {
+			for (Projectile p : projectiles) {
+				if (b.getBoxCollider().isColliding(p.getBoxCollider())) {
+					toBeRemovedProj.add(p);
+					b.updateState();
+					break;
+				}
+			}
+		}
+		removeProjectile(toBeRemovedProj, projectiles);
+	}
+
+	private void projCollidesProj() {
+		ArrayList<Projectile> toBeRemovedAlienProj = new ArrayList<Projectile>();
+		ArrayList<Projectile> toBeRemovedPlayerProj = new ArrayList<Projectile>();
+		for (Projectile ap : alienProjectiles) {
+			for (Projectile pp : playerProjectiles) {
+				if (ap.getBoxCollider().isColliding(pp.getBoxCollider())) {
+					toBeRemovedAlienProj.add(ap);
+					toBeRemovedPlayerProj.add(pp);
+					break;
+				}
+			}
+		}
+		removeProjectile(toBeRemovedAlienProj, alienProjectiles);
+		removeProjectile(toBeRemovedPlayerProj, playerProjectiles);
+	}
+
+	private void alienReachesFloor() {
+		for (Alien alien : aliens) {
+			if (alien.getPosition().getY() + alien.getHeight() + alien.getSpeed() >= this.gameY) {
+				endGame();
+				break;
+			}
 		}
 	}
 }

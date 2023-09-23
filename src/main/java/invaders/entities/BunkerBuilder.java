@@ -37,8 +37,8 @@ public abstract class BunkerBuilder {
         this.state = state;
     }
 
-    public void setBoxCollider(Collider boxCollider) {
-        this.boxCollider = boxCollider;
+    public void setBoxCollider(Collider col) {
+        this.boxCollider = col;
     }
 
     public abstract Bunker getBunker();

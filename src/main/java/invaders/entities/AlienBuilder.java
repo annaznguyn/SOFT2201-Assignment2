@@ -1,7 +1,7 @@
 package invaders.entities;
 
-import invaders.physics.Vector2D;
 import invaders.physics.Collider;
+import invaders.physics.Vector2D;
 import javafx.scene.image.Image;
 
 import java.io.File;
@@ -13,10 +13,8 @@ public abstract class AlienBuilder {
 
     protected final Image image;
     protected Vector2D position;
-    protected int speed;
-    protected boolean isHit;
+    protected double speed;
     protected String alienType;
-
     protected Collider boxCollider;
 
     public AlienBuilder(Vector2D position) {
@@ -24,20 +22,16 @@ public abstract class AlienBuilder {
         this.image = new Image(new File("src/main/resources/enemy.png").toURI().toString(), width, height, false, true);
     }
 
-    public void setSpeed(int speed) {
+    public void setSpeed(double speed) {
         this.speed = speed;
-    }
-
-    public void setIsHit(boolean isHit) {
-        this.isHit = isHit;
     }
 
     public void setAlienType(String alienType) {
         this.alienType = alienType;
     }
 
-    public void setBoxCollider(Collider boxCollider) {
-        this.boxCollider = boxCollider;
+    public void setBoxCollider(Collider col) {
+        this.boxCollider = col;
     }
 
     public abstract Alien getAlien();

@@ -15,19 +15,28 @@ import java.io.File;
 
 public class Player implements Moveable, Damagable, Renderable {
 
-    private final Vector2D position;
-    private final Animator anim = null;
-    private double health = 100;
-
+    private Vector2D position;
+    private double health;
     private final double width = 25;
     private final double height = 30;
     private final Image image;
     private Collider boxCollider;
+    private String colour;
 
-    public Player(Vector2D position){
+    public Player(Vector2D position, int lives, String colour){
         this.image = new Image(new File("src/main/resources/player.png").toURI().toString(), width, height, true, true);
         this.position = position;
-        this.boxCollider = new BoxCollider(width, height, position);
+        this.health = lives;
+        this.colour = colour;
+        this.boxCollider = new BoxCollider(width, height, this.position);
+    }
+
+    public void setPosition(Vector2D position) {
+        this.position = position;
+    }
+
+    public String getColour() {
+        return colour;
     }
 
     @Override
@@ -73,6 +82,10 @@ public class Player implements Moveable, Damagable, Renderable {
         return playerProjectile;
     }
 
+    public Collider getBoxCollider() {
+        return boxCollider;
+    }
+
     @Override
     public Image getImage() {
         return this.image;
@@ -97,9 +110,4 @@ public class Player implements Moveable, Damagable, Renderable {
     public Layer getLayer() {
         return Layer.FOREGROUND;
     }
-
-    public Collider getBoxCollider() {
-        return boxCollider;
-    }
-
 }

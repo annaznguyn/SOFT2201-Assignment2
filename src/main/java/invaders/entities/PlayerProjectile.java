@@ -19,8 +19,13 @@ public class PlayerProjectile implements Projectile, Renderable {
         this.position = position;
         this.width = width;
         this.height = height;
-        this.image = new Image(new File("src/main/resources/projectile.png").toURI().toString(), width, height, false, true);
         this.boxCollider = boxCollider;
+        this.image = new Image(new File("src/main/resources/projectile.png").toURI().toString(), width, height, false, true);
+    }
+
+    @Override
+    public Collider getBoxCollider() {
+        return boxCollider;
     }
 
     @Override
@@ -56,11 +61,6 @@ public class PlayerProjectile implements Projectile, Renderable {
 
     @Override
     public void shoot() {
-        position.setY(position.getY() - 2);
-    }
-
-    @Override
-    public Collider getBoxCollider() {
-        return boxCollider;
+        position.setY(position.getY() - 1);
     }
 }

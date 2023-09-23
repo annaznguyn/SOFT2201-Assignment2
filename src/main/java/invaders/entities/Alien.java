@@ -13,8 +13,7 @@ public class Alien implements Renderable, GameObject {
     private double width;
     private double height;
     private Vector2D position;
-    private int speed;
-    private boolean isHit;
+    private double speed;
     private String alienType;
     private final Image image;
     private Collider boxCollider;
@@ -22,7 +21,6 @@ public class Alien implements Renderable, GameObject {
     public Alien(AlienBuilder ab) {
         this.position = ab.position;
         this.speed = ab.speed;
-        this.isHit = ab.isHit;
         this.alienType = ab.alienType;
         this.image = ab.image;
         this.width = ab.width;
@@ -55,20 +53,12 @@ public class Alien implements Renderable, GameObject {
         return Layer.FOREGROUND;
     }
 
-    public int getSpeed() {
+    public double getSpeed() {
         return speed;
     }
 
-    public boolean getIsHit() {
-        return isHit;
-    }
-
     public void increaseSpeed() {
-        speed++;
-    }
-
-    public Collider getBoxCollider() {
-        return boxCollider;
+        speed += 0.2;
     }
 
     public Projectile fireProjectile(GameEngine gameEngine) {
@@ -85,6 +75,10 @@ public class Alien implements Renderable, GameObject {
         alienProjectile.setProjectileStrategy(projectileStrategy);
         gameEngine.getRenderables().add((Renderable) alienProjectile);
         return alienProjectile;
+    }
+
+    public Collider getBoxCollider() {
+        return boxCollider;
     }
 
     @Override

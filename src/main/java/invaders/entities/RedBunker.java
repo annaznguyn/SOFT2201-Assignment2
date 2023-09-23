@@ -23,6 +23,6 @@ public class RedBunker implements BunkerState {
     // change color to Yellow
     @Override
     public void changeState(Bunker bunker) {
-        bunker.disappear = true;
+        bunker.setDisappear(true);
     }
 }

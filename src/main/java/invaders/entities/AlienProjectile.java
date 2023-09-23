@@ -21,8 +21,8 @@ public class AlienProjectile implements Projectile, Renderable {
         this.position = position;
         this.width = width;
         this.height = height;
-        this.image = new Image(new File("src/main/resources/projectile.png").toURI().toString(), width, height, false, true);
         this.boxCollider = boxCollider;
+        this.image = new Image(new File("src/main/resources/projectile.png").toURI().toString(), width, height, false, true);
     }
 
     @Override

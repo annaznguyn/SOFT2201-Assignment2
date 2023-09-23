@@ -13,7 +13,7 @@ public class YellowBunker implements BunkerState {
     public YellowBunker(double width, double height) {
         this.width = width;
         this.height = height;
-        this.image = new Image(new File("src/main/resources/yellow-bunker.png").toURI().toString(), width, height, false, true);
+        this.image = new Image(new File("src/main/resources/yellow-bunker.jpg").toURI().toString(), width, height, false, true);
     }
 
     public Image getImage() {
