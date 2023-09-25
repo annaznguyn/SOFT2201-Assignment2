@@ -24,15 +24,17 @@ public class Player implements Moveable, Damagable, Renderable {
     private String colour;
 
     public Player(Vector2D position, int lives, String colour){
-        this.image = new Image(new File("src/main/resources/player.png").toURI().toString(), width, height, true, true);
         this.position = position;
         this.health = lives;
         this.colour = colour;
         this.boxCollider = new BoxCollider(width, height, this.position);
-    }
 
-    public void setPosition(Vector2D position) {
-        this.position = position;
+        // default colour of player is blue
+        String path = "src/main/resources/player.png";
+        if (colour.equals("green")) {
+            path = "src/main/resources/green-player.png";
+        }
+        this.image = new Image(new File(path).toURI().toString(), width, height, true, true);
     }
 
     public String getColour() {

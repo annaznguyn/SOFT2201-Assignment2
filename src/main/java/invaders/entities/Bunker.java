@@ -1,18 +1,16 @@
 package invaders.entities;
 
-import invaders.GameObject;
 import invaders.physics.Collider;
 import invaders.physics.Vector2D;
 import invaders.rendering.Renderable;
 import javafx.scene.image.Image;
 
-public class Bunker implements Renderable, GameObject {
+public class Bunker implements Renderable {
 
     private double width;
     private double height;
     private Vector2D position;
     private Image image;
-    private int timesHit;
     private BunkerState state;
     protected boolean disappear;
     protected Collider boxCollider;
@@ -22,7 +20,6 @@ public class Bunker implements Renderable, GameObject {
         this.height = bb.height;
         this.position = bb.position;
         this.image = bb.image;
-        this.timesHit = bb.timesHit;
         this.state = bb.state;
         this.disappear = bb.disappear;
         this.boxCollider = bb.boxCollider;
@@ -53,14 +50,6 @@ public class Bunker implements Renderable, GameObject {
         return Layer.FOREGROUND;
     }
 
-    public int getTimesHit() {
-        return timesHit;
-    }
-
-    public void increaseTimesHit() {
-        timesHit++;
-    }
-
     public Collider getBoxCollider() {
         return boxCollider;
     }
@@ -72,12 +61,6 @@ public class Bunker implements Renderable, GameObject {
     public void setDisappear(boolean disappear) {
         this.disappear = disappear;
     }
-
-    @Override
-    public void start() {}
-
-    @Override
-    public void update() {}
 
     public void setState(BunkerState state) {
         this.state = state;

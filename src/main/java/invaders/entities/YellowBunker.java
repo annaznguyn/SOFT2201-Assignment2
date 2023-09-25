@@ -16,6 +16,7 @@ public class YellowBunker implements BunkerState {
         this.image = new Image(new File("src/main/resources/yellow-bunker.jpg").toURI().toString(), width, height, false, true);
     }
 
+    @Override
     public Image getImage() {
         return image;
     }

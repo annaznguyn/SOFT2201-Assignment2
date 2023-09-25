@@ -16,6 +16,7 @@ public class GreenBunker implements BunkerState {
         this.image = new Image(new File("src/main/resources/green-bunker.png").toURI().toString(), width, height, false, true);
     }
 
+    @Override
     public Image getImage() {
         return image;
     }

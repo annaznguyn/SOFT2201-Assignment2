@@ -1,6 +1,5 @@
 package invaders.entities;
 
-import invaders.GameObject;
 import invaders.engine.GameEngine;
 import invaders.physics.BoxCollider;
 import invaders.physics.Collider;
@@ -8,7 +7,7 @@ import invaders.physics.Vector2D;
 import invaders.rendering.Renderable;
 import javafx.scene.image.Image;
 
-public class Alien implements Renderable, GameObject {
+public class Alien implements Renderable {
 
     private double width;
     private double height;
@@ -80,12 +79,6 @@ public class Alien implements Renderable, GameObject {
     public Collider getBoxCollider() {
         return boxCollider;
     }
-
-    @Override
-    public void start() {}
-
-    @Override
-    public void update() {}
 
     public void goLeft() {
         position.setX(position.getX() - speed);

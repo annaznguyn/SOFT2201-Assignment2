@@ -8,12 +8,9 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.Node;
 
 public class SpaceBackground implements Renderable {
 	private Rectangle space;
-	private Pane pane;
-    private GameEngine model;
 
 	public SpaceBackground(GameEngine engine, Pane pane){
 		double width = pane.getWidth();
@@ -25,6 +22,7 @@ public class SpaceBackground implements Renderable {
 		pane.getChildren().add(space);
 	}
 
+	@Override
 	public Image getImage() {
 		return null;
 	}

@@ -1,11 +1,9 @@
 package invaders.engine;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import invaders.GameObject;
 import invaders.entities.*;
 import invaders.physics.BoxCollider;
 import invaders.physics.Vector2D;
@@ -25,12 +23,9 @@ import org.json.simple.parser.ParseException;
  */
 public class GameEngine {
 
-	private String configPath = "src/main/resources/config.json";
-
 	private final int gameX;
 	private final int gameY;
 
-	private List<GameObject> gameobjects;
 	private List<Renderable> renderables;
 	private Player player;
 
@@ -52,7 +47,6 @@ public class GameEngine {
 		this.gameX = gameX;
 		this.gameY = gameY;
 
-		this.gameobjects = new ArrayList<GameObject>();
 		this.renderables = new ArrayList<Renderable>();
 		this.aliens = new ArrayList<Alien>();
 		this.bunkers = new ArrayList<Bunker>();
@@ -62,7 +56,7 @@ public class GameEngine {
 		JSONParser parser = new JSONParser();
 		try {
 			// create a JSONObject of the json file
-			JSONObject jo = (JSONObject) parser.parse(new FileReader(configPath));
+			JSONObject jo = (JSONObject) parser.parse(new FileReader(config));
 			// read player
 			JSONObject playerObj = (JSONObject) jo.get("Player");
 			playerX = (int) ((long) ((JSONObject) playerObj.get("position")).get("x"));
@@ -102,7 +96,6 @@ public class GameEngine {
 				// build bunkers
 				Vector2D bunkerPosition = new Vector2D(positionX, positionY);
 				BunkerBuilder bunkerBuilder = new ConcreteBunkerBuilder(bunkerPosition, width, height);
-				bunkerBuilder.setTimesHit(0);
 				bunkerBuilder.setDisappear(false);
 				// initially the state is green
 				bunkerBuilder.setState(new GreenBunker(width, height));
@@ -122,7 +115,7 @@ public class GameEngine {
 			e.printStackTrace();
 		}
 		// initially, the aliens fly to the left side
-		this.flyLeft = true;
+		flyLeft = true;
 		// random interval length
 		interval = 0;
 	}
@@ -401,14 +394,12 @@ public class GameEngine {
 			if (p.getBoxCollider().isColliding(player.getBoxCollider())) {
 				player.takeDamage(1);
 				toBeRemovedProj.add(p);
-				System.out.println("HERE");
 				// reset player's position
+				player.getPosition().setX(playerX);
+				player.getPosition().setY(playerY);
 				break;
 			}
 		}
-//		if (toBeRemovedProj.size() > 0) {
-//			player.setPosition(new Vector2D(playerX, playerY));
-//		}
 		removeProjectile(toBeRemovedProj, alienProjectiles);
 		if (!player.isAlive()) {
 			endGame();

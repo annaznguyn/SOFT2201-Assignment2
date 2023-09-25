@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class App extends Application {
 
-    private String configPath = "src/main/resources/config.json";
+    private String configPath;
 
     public static void main(String[] args) {
         launch(args);
@@ -25,6 +25,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        this.configPath = "src/main/resources/config.json";
         Map<String, String> params = getParameters().getNamed();
 
         // parse json file to get width and height

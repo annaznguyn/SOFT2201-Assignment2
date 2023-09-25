@@ -13,7 +13,6 @@ public abstract class BunkerBuilder {
 
     protected final Image image;
     protected Vector2D position;
-    protected int timesHit;
     protected boolean disappear;
     protected BunkerState state;
     protected Collider boxCollider;
@@ -25,9 +24,6 @@ public abstract class BunkerBuilder {
         this.image = new Image(new File("src/main/resources/green-bunker.png").toURI().toString(), width, height, false, true);
     }
 
-    public void setTimesHit(int timesHit) {
-        this.timesHit = timesHit;
-    }
 
     public void setDisappear(boolean disappear) {
         this.disappear = disappear;
